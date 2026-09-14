@@ -113,6 +113,8 @@
 |------|--------|------------|----------|
 | S0-GUIA-EJECUTADA.md | ✅ Completa | 100% | Sí (6 ejemplos reales) |
 | S1-GUIA-EJECUTADA.md | ✅ Completa | 100% | Sí (5+ ejemplos) |
+| S2-GUIA-EJECUTADA.md | ✅ Completa | 100% | Sí (pruebas validadas) |
+| S3-GUIA-EJECUTADA.md | ✅ Completa | 100% | Sí (pruebas validadas) |
 | RESUMEN-S0-S1-COMPLETADA.md | ✅ Completa | 100% | Sí (comandos exactos) |
 
 ---

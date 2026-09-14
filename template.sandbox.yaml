@@ -133,7 +133,9 @@ Resources:
             TableName: !Ref ProductsTable
         - Statement:
             - Effect: Allow
-              Action: comprehend:DetectSentiment
+              Action:
+                - comprehend:DetectSentiment
+                - comprehend:DetectDominantLanguage
               Resource: "*"
       FunctionUrlConfig:
         AuthType: NONE
