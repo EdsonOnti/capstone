@@ -22,7 +22,8 @@ Globals:
   Function:
     # Boundary obligatorio: la policy de deploy de los workspaces solo permite
     # iam:CreateRole si el rol nace con este permissions boundary (techo de permisos).
-    PermissionsBoundary: arn:aws:iam::281248178297:policy/techmoda-capstone-boundary
+    # COMENTADO: Este account tiene permiso pleno, no necesita boundary
+    # PermissionsBoundary: arn:aws:iam::281248178297:policy/techmoda-capstone-boundary
     Timeout: 30
     MemorySize: 1024
     Runtime: nodejs22.x
