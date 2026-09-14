@@ -8,8 +8,18 @@ Material educativo (Bootcamp Institute / AWS re/Start, pista **AI Practitioner A
 de e-commerce serverless ("TechModa") al que se le agregan capacidades de IA de AWS **una sesión de
 ~1 h a la vez**. Cada sesión (`sessions/S00..S11`) es autocontenida: guía + Lambda + snippet de SAM.
 
+**Estado:** ✅ S0, S1, S2, S3 completadas y documentadas (4/12 sesiones).
+
 La documentación está en **español** (guías, comentarios, mensajes de scripts). Mantené ese idioma al
 editar guías o agregar sesiones; el código y los identificadores están en inglés.
+
+**Sesiones completadas:**
+- S0: Base serverless (Router CRUD + DynamoDB + Function URL)
+- S1: Rekognition Labels (auto-etiquetado de imágenes)
+- S2: Moderación + Alt-text (seguridad de contenido + accesibilidad)
+- S3: Análisis de sentimiento (NLP con Comprehend)
+
+Cada una incluye: código funcional, guía paso a paso, pruebas validadas, documentación para principiantes en AWS.
 
 ## Comandos
 
