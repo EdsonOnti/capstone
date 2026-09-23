@@ -1,238 +1,335 @@
-# TechModa AI — Capstone AWS re/Start · AI Practitioner (AIF-C01)
+# 🛍️ TechModa — Capstone AWS AI (AIF-C01)
 
-> **Bootcamp Institute · AWS re/Start**
-> Versión **AI Practitioner** del capstone serverless de e-commerce *TechModa*.
-> Tomamos una tienda de moda serverless ya funcional (Lambda Function URLs + DynamoDB + React)
-> y le agregamos, **una sesión de 1 hora a la vez**, capacidades de **IA preentrenada y generativa**
-> de AWS. Cada sesión es autocontenida: se despliega y se ve funcionar en ~60 minutos.
-
-> 🔌 **Dos decisiones de arquitectura.** (1) **Sin API Gateway**: la API se expone con **Lambda
-> Function URLs** — ver **[`docs/SANDBOX-COMPAT.md`](docs/SANDBOX-COMPAT.md)**. (2) **IAM de mínimo
-> privilegio por función**: cada Lambda declara sus `Policies:` y SAM le crea su rol — ver
-> **[`docs/IAM.md`](docs/IAM.md)**, léelo antes de agregar funciones. Necesitás una cuenta AWS donde
-> puedas **crear roles IAM** (`iam:CreateRole`).
-
-> 📄 La documentación del **capstone serverless base** (sin IA) se conserva en
-> [`README-BASE-SERVERLESS.md`](README-BASE-SERVERLESS.md).
+**Estado:** ✅ S0–S3 completadas | ✅ S4–S6 implementadas | 🚀 Ruta hacia **S7 RAG** en progreso
 
 ---
 
-## 🎯 Visión
+## 📊 Lo que se ha implementado
 
-TechModa es una boutique de moda online. Su catálogo serverless ya hace el CRUD básico de productos.
-El reto del/la egresado/a de re/Start es **convertir ese catálogo en un producto "AI-powered"** usando
-exclusivamente servicios administrados de IA de AWS — **sin entrenar un solo modelo**. Ese es justo el
-corazón del examen **AWS Certified AI Practitioner (AIF-C01)**: saber **elegir y aplicar** el servicio
-de IA correcto para cada problema de negocio, entendiendo sus capacidades, costos, riesgos y controles.
+### ✅ S0 — Base Serverless
+**Lambda router CRUD + DynamoDB + Function URLs**
+- 4 productos base en BD
+- Operaciones CRUD funcionales (GET, POST, PUT, DELETE)
+- Autenticación: ninguna (desarrollo)
+- Frontend en CloudFront + S3 estático
 
-Al terminar las 12 sesiones, TechModa:
+### ✅ S1 — Visión: Etiquetado Automático
+**Rekognition `DetectLabels`**
+- Analiza imágenes de productos automáticamente
+- Genera etiquetas + confianzas
+- Campos: `aiLabels`, `aiLabelsRaw`
+- **UX:** Búsqueda y clasificación mejoradas
 
-- **Etiqueta y modera** sus fotos de producto automáticamente (Rekognition).
-- Genera **texto alternativo accesible** para cada imagen (Rekognition + accesibilidad).
-- Entiende el **sentimiento** de las reseñas de clientes (Comprehend).
-- Ofrece su catálogo **bilingüe ES↔EN** sin traductores humanos (Translate).
-- Lee las descripciones **en voz alta** para accesibilidad (Polly).
-- **Redacta descripciones de producto** a partir de atributos (Bedrock — IA generativa).
-- Tiene **búsqueda semántica / RAG** sobre el catálogo (Bedrock embeddings).
-- Incluye un **asistente de compras conversacional** (Bedrock — chatbot + prompt engineering).
-- Aplica **guardrails, control de sesgo y privacidad** sobre todas sus features de IA (Bedrock Guardrails).
-- Opera con **IAM de mínimo privilegio, logging de invocación y control de costos** (gobernanza).
+### ✅ S2 — Moderación + Accesibilidad
+**Rekognition `DetectModerationLabels` + generación de alt-text**
+- Detecta contenido inapropiado
+- Genera descripciones accesibles (WCAG 2.1)
+- Campos: `moderationStatus`, `moderationFlags`, `altText`
+- **Control de calidad:** Seguridad de contenido + inclusión
 
----
+### ✅ S3 — NLP: Análisis de Sentimiento
+**Comprehend `DetectSentiment` + `DetectDominantLanguage`**
+- Analiza reseñas de clientes automáticamente
+- Clasifica: POSITIVE / NEGATIVE / NEUTRAL / MIXED
+- Campos: `reviewSentiment`, `reviewSentimentCounts`
+- **Business intelligence:** Métricas de satisfacción en tiempo real
 
-## 🗺️ Mapa de las 12 sesiones
+### ✅ S4 — Traducción: Catálogo Multiidioma
+**Amazon Translate**
+- Traduce automáticamente `name` + `description` ES↔EN
+- Traducciones guardadas en `translations.es`, `translations.en`
+- **Globalización:** Alcance a clientes en dos idiomas
+- Detección automática de idioma vía Comprehend
 
-| # | Sesión | Servicio de IA | Dominio AIF-C01 | Estado |
-|---|--------|----------------|-----------------|--------|
-| **S0** | [Desplegar TechModa base (CRUD serverless)](sessions/S00-base/GUIA.md) | — | Cimiento | ✅ Completa |
-| **S1** | [Auto-etiquetado de imágenes de producto](sessions/S01-rekognition-labels/GUIA.md) | Rekognition `DetectLabels` | D1 (20%) | ✅ Completa |
-| **S2** | [Moderación de imágenes + alt-text accesible](sessions/S02-moderation-alttext/GUIA.md) | Rekognition `DetectModerationLabels` | D4 (14%) | ✅ Completa |
-| **S3** | [Sentimiento de reseñas](sessions/S03-comprehend-sentiment/GUIA.md) | Comprehend `DetectSentiment` | D1 (20%) | ✅ Completa |
-| **S4** | [Catálogo multilingüe ES↔EN](sessions/S04-translate-multilang/GUIA.md) | Translate `TranslateText` | D1 (20%) | ✅ Completa |
-| **S5** | [Descripción por voz (accesibilidad)](sessions/S05-polly-voice/GUIA.md) | Polly `SynthesizeSpeech` | D1 + D4 | ✅ Completa |
-| **S6** | [Generar descripciones desde atributos](sessions/S06-bedrock-descripciones/GUIA.md) | Bedrock `InvokeModel` | D2 (24%) | ✅ Completa |
-| **S7** | [Búsqueda semántica / RAG sobre el catálogo](sessions/S07-bedrock-rag-busqueda/GUIA.md) | Bedrock embeddings | D3 (28%) | ✅ Completa |
-| **S8** | [Asistente de compras (chatbot)](sessions/S08-bedrock-chatbot/GUIA.md) | Bedrock + prompt engineering | D2 + D3 | ✅ Completa |
-| **S9** | [Guardrails, sesgo y privacidad](sessions/S09-guardrails-sesgo/GUIA.md) | Bedrock Guardrails | D4 (14%) | 🟡 Guía detallada + scaffold |
-| **S10** | [IAM mínimo privilegio, logging, costos](sessions/S10-iam-logging-costos/GUIA.md) | — (gobernanza) | D5 (14%) | 🟡 Guía detallada + scaffold |
-| **S11** | [Integración final, demo, documentación, cleanup](sessions/S11-integracion-demo-cleanup/GUIA.md) | — (cierre) | Todos | 🟡 Guía detallada + scripts |
+### ✅ S5 — Síntesis de Voz: Audio Accesible
+**Amazon Polly**
+- Genera audio de descripciones de producto (accesibilidad)
+- Soporta múltiples voces y lenguajes
+- Campos: `audioUrl`, `audioTranscript`
+- **Inclusión:** Usuarios con discapacidad visual
 
-> **Leyenda de estado**
-> ✅ **Completa** = código funcional (Lambda Python + boto3), snippet de `template.yaml` listo para pegar, y GUIA.md paso a paso.
-> 🟡 **Guía + scaffold** = GUIA.md detallada con conceptos, pasos y "qué entra en el examen", más esqueleto de código/política para completar en la sesión.
-
----
-
-## 📚 Mapa AIF-C01: dominios ↔ sesiones
-
-El examen **AIF-C01** distribuye sus preguntas en 5 dominios. Verificado contra la
-[guía oficial del examen (AWS)](https://docs.aws.amazon.com/aws-certification/latest/examguides/ai-practitioner-01.html)
-el **2026-06-17**:
-
-| Dominio | Nombre | Peso | Sesiones que lo cubren |
-|---------|--------|------|------------------------|
-| **D1** | Fundamentals of AI and ML | **20%** | S1, S3, S4, S5 |
-| **D2** | Fundamentals of Generative AI | **24%** | S6, S8 |
-| **D3** | Applications of Foundation Models | **28%** | S7, S8 |
-| **D4** | Guidelines for Responsible AI | **14%** | S2, S5, S9 |
-| **D5** | Security, Compliance & Governance for AI | **14%** | S10, S11 |
-
-> **D2 + D3 = 52% del examen** → la mitad del peso es **IA generativa y foundation models**.
-> Por eso las sesiones S6–S8 (Bedrock) concentran el mayor valor pedagógico.
->
-> ⚠️ Los pesos pueden cambiar entre versiones del examen. **Verificá siempre la guía oficial vigente** antes de presentar.
+### ✅ S6 — Generación de Texto: Descripciones de Producto
+**Amazon Bedrock + Claude**
+- Genera descripciones de marketing con IA generativa
+- Parámetros: tono (elegante, divertido, minimalista), etiquetas visuales
+- Tokens controlados, temperatura configurable
+- **Marketing:** Descripciones consistentes a escala
+- **Mitigación:** Ancla a datos reales, prompts anti-alucinación
 
 ---
 
-## 🏗️ Arquitectura
+## 🎯 Flujo Actual: De la Imagen Bruta a la Exhibición
 
 ```
-                    ┌──────────────────────────────────────────────┐
-                    │      Frontend React (S3 + CloudFront)        │
-                    └───────────────────────┬──────────────────────┘
-                                            │ HTTPS
-              ┌─────────────────────────────┼──────────────────────────────┐
-              │ Lambda Function URLs (AuthType NONE, CORS *) — sin API GW   │
-              └──────┬───────────────────────────────────┬─────────────────┘
-                     ▼ (1 Function URL)                   ▼ (1 URL por función IA)
-        Router CRUD (Node.js, base S0)        AI Lambdas (S1–S8, Python + boto3)
-        functions/router/index.js             ├─ enrich-labels      → Rekognition
-          ├─ list/create/get/update/delete     ├─ moderate-image     → Rekognition
-          (reusa las 5 Lambdas CRUD)           ├─ analyze-sentiment  → Comprehend
-                     │                          ├─ translate-catalog  → Translate
-                     │                          ├─ synthesize-voice   → Polly (+ S3 audio)
-                     │                          ├─ generate-desc      → Bedrock
-                     │                          ├─ semantic-search    → Bedrock (embeddings)
-                     │                          └─ shopping-assistant → Bedrock (chat)
-                     │   (cada una con su rol de mínimo privilegio creado por SAM)
-                     ▼
-              ┌────────────────────────────┐
-              │   DynamoDB  (Products)     │
-              └────────────────────────────┘
+┌────────────────────────────────────────────────────────────┐
+│          SUBIDA DE IMAGEN (Admin)                          │
+│          S3 presigned URL + upload directo                │
+└──────────────┬───────────────────────────────────────────┘
+               │
+        ┌──────┴──────────────────────┐
+        │ statusImage = PENDING        │
+        │ (NO visible aún)             │
+        └──────┬──────────────────────┘
+               │
+        ┌──────▼─────────────────────────────────────────┐
+        │ S1 — Rekognition Labels                       │
+        │ └─ Extrae aiLabels (etiquetas visuales)       │
+        └──────┬─────────────────────────────────────────┘
+               │
+        ┌──────▼─────────────────────────────────────────┐
+        │ S2 — Moderación + Alt-text                    │
+        │ ├─ Detecta contenido inapropiado              │
+        │ ├─ Status = APPROVED / FLAGGED                │
+        │ └─ Genera altText para accesibilidad (WCAG)   │
+        └──────┬─────────────────────────────────────────┘
+               │
+        ┌──────▼─────────────────────────────────────────┐
+        │ ✅ APROBADA POR MODERACIÓN                    │
+        │ statusImage = APPROVED                         │
+        │ (Ahora SÍ visible en frontend cliente)         │
+        └──────┬─────────────────────────────────────────┘
+               │
+        ┌──────▼─────────────────────────────────────────┐
+        │ S4 — Traducción (Paralelo)                    │
+        │ └─ Traduce name + description ES↔EN           │
+        └──────┬─────────────────────────────────────────┘
+        ┌──────▼─────────────────────────────────────────┐
+        │ S5 — Síntesis de Voz (Paralelo)              │
+        │ └─ Genera audio con Polly para accesibilidad  │
+        └──────┬─────────────────────────────────────────┘
+        ┌──────▼─────────────────────────────────────────┐
+        │ S6 — Generación de Descripción (Paralelo)    │
+        │ └─ Claude reescribe con tono + etiquetas     │
+        └──────────────────────────────────────────────┘
+               │
+        ┌──────▼─────────────────────────────────────────┐
+        │    FRONTEND CLIENTE (React/Vite)             │
+        │  ├─ Imagen visible (status APPROVED)          │
+        │  ├─ Etiquetas S1                              │
+        │  ├─ Alt-text accesible (S2)                   │
+        │  ├─ Audio disponible (S5)                     │
+        │  ├─ Descripción S6 o original                 │
+        │  ├─ Traducciones S4 (ES/EN)                  │
+        │  └─ Reseñas + Sentimiento (S3)               │
+        └──────────────────────────────────────────────┘
 ```
 
-- **Base (S0):** **Lambda Function URL** (router CRUD Node.js) + DynamoDB + Frontend React, vía **AWS SAM**. Sin API Gateway.
-- **IA (S1–S8):** cada sesión agrega 1 Lambda **Python 3.12 + boto3** (con su propia Function URL) que llama a un servicio de IA administrado y **escribe el resultado de vuelta en DynamoDB** o lo retorna.
-- **IaC:** todo es **AWS SAM** (`template.yaml`). Cada sesión trae un `template-snippet.yaml` con el recurso nuevo (Function URL + `Policies:` acotadas), listo para pegar.
-- **IAM:** un rol de mínimo privilegio por función, creado por SAM → ver **[`docs/IAM.md`](docs/IAM.md)**.
+**Clave del flujo:** 
+- **S2 es el gatekeeper:** Imagen no se muestra hasta APPROVED
+- **S4, S5, S6 enriquecen** en paralelo (no bloquean la visualización)
+- **Todo en DynamoDB:** Un solo `GET /products/:id` trae todo
 
 ---
 
-## ✅ Prerequisitos
+## 🛣️ Ruta a S7 (RAG + Búsqueda Semántica)
 
-1. **Una cuenta AWS donde puedas crear roles IAM** (`iam:CreateRole`).
-   - El stack crea un rol de ejecución de mínimo privilegio **por Lambda**; sin ese permiso el deploy
-     falla y CloudFormation revierte el stack entero. Ver [`docs/SANDBOX-COMPAT.md`](docs/SANDBOX-COMPAT.md) §2.
-   - Región de trabajo: **`us-east-1`** (Norte de Virginia). Podés cambiarla: nada está atado a la región.
-2. Herramientas: **AWS SAM CLI**, **AWS CLI v2**, **Node.js 22+**, **Python 3.12** (tiene que coincidir
-   con el `Runtime` de las Lambdas de IA), **git**. El devcontainer de este repo las trae fijadas.
-3. **Acceso a modelos de Bedrock** habilitado para S6–S9:
-   Consola → **Amazon Bedrock → Model access** → habilitar los modelos que uses (Anthropic Claude Haiku
-   y Amazon Titan Embeddings). Es un setting **por región**: habilitalo en la región del deploy.
+### Por qué S7 es el siguiente paso
 
-> ✅ **Chequeo de un comando antes de tocar AWS:** `bash scripts/validate-all.sh --static`
-> (herramientas, los 3 templates, los 8 snippets, sintaxis, frontend y coherencia del repo).
-> Con el stack ya desplegado, `bash scripts/validate-all.sh` prueba además el CRUD y las 9 features de IA.
+Hasta S6, **los usuarios navegan**. Con S7, **los usuarios preguntan**.
+
+**S7 — RAG: Búsqueda Semántica + Chatbot**
+
+```
+"¿Qué tienes para trabajar desde casa?"
+         ↓
+  Embed pregunta → [0.12, -0.45, 0.78, ...]
+         ↓
+  Busca vectores similares en DynamoDB
+         ↓
+  Recupera: Laptop, Monitor, Silla ajustable
+         ↓
+  Prompt a Claude: "Basándote en estos productos,
+                   recomienda un setup para oficina
+                   en casa con presupuesto bajo"
+         ↓
+  "Te recomiendo: la Laptop (portátil), el Monitor
+   (calibrado para leer largo rato) y la Silla
+   (soporte lumbar)..."
+```
+
+**Arquitectura S7:**
+```
+┌─────────────┐
+│  Frontend   │
+│  Chat box   │
+└──────┬──────┘
+       │ "¿Qué tienes para home office?"
+       ▼
+┌──────────────────────────────────────────┐
+│ Lambda S7 — RAG Retrieval                │
+│ (Nueva)                                   │
+└──────┬───────────────────────────────────┘
+       │
+       ├─ 1. Bedrock Embeddings API
+       │     Convierte pregunta a vector
+       │
+       ├─ 2. DynamoDB Vector Search
+       │     Busca Top-K productos similares
+       │
+       └─ 3. Bedrock Claude (Converse API)
+           Prompt: "Productos recuperados + pregunta"
+           Respuesta: recomendación personalizada
+```
+
+**Por qué S7 es importante:**
+- ✅ **Cierra el loop IA:** Datos (S0) → Etiquetas (S1) → Moderación (S2) → Sentimiento (S3) → **Búsqueda semántica + recomendación (S7)**
+- ✅ **Requiere todos los bloques:** Bedrock, embeddings, búsqueda vectorial, retrieval
+- ✅ **Escala a S8:** El chatbot multi-turno está aquí
 
 ---
 
-## 🚀 Cómo desplegar la base (S0)
+## 📈 Mejoras Realizadas (S0–S6)
+
+| Mejora | Sesión | Impacto |
+|--------|--------|--------|
+| Infraestructura serverless | S0 | Escalabilidad automática, sin DevOps |
+| **Gating de imagen** | S2 | Solo imágenes aprobadas llegan a clientes |
+| Moderación + alt-text | S2 | Cumplimiento legal (WCAG) + accesibilidad |
+| Análisis de sentimiento | S3 | Insights de clientes en tiempo real |
+| Etiquetado automático | S1 | Búsqueda mejorada (keywords AI) |
+| Traducción automática | S4 | Alcance global (ES/EN) sin traductores |
+| Síntesis de voz | S5 | Inclusión: usuarios con discapacidad visual |
+| Generación de descripciones | S6 | Marketing a escala, tono consistente |
+| CloudFront + S3 | S0-S6 | CDN global, imágenes + frontend rápidos |
+| IAM mínimo privilegio | S0-S6 | Seguridad: cada Lambda solo accede lo necesario |
+
+---
+
+## 🚀 Mejoras Futuras (S7+)
+
+### Corto Plazo (S7–S8)
+- **RAG completo:** Búsqueda semántica sobre todo el catálogo
+- **Chatbot multiidioma:** Claude + Comprehend Translate
+- **Caché de embeddings:** No recalcular para búsquedas frecuentes
+- **Historial de conversaciones:** Cognito + sesiones
+
+### Mediano Plazo (S9–S10)
+- **Gobernanza de datos:** Tags, provenance tracking, auditoría
+- **Cost optimization:** Presupuestos + alertas con CloudWatch
+- **Analytics dashboard:** Búsquedas populares, productos más recomendados
+- **Autenticación:** Cognito + JWT tokens
+
+### Largo Plazo (Producción)
+- **Fine-tuning:** Embeddings customizados por dominio
+- **A/B Testing:** Distintos prompts de Claude por cohorte
+- **Observabilidad:** X-Ray tracing, métricas personalizadas
+- **Load testing:** Patrón de compra vs. throughput
+- **Feedback loop:** Usuarios califican recomendaciones S7
+
+---
+
+## 🎓 Stack Actual
+
+```yaml
+Lenguajes:       Node.js 22.x (S0), Python 3.12 (S1–S6)
+Almacén:         DynamoDB (productos, reseñas, vectores S7)
+Imágenes:        S3 + CloudFront (CDN)
+Compute:         Lambda (serverless, 13 funciones)
+Visión:          Rekognition (etiquetas, moderación)
+NLP:             Comprehend (sentimiento, idioma)
+Traducción:      Amazon Translate
+Síntesis:        Amazon Polly
+IA Generativa:   Bedrock (Claude Haiku)
+Embeddings:      Bedrock Titan (S7)
+IaC:             SAM + CloudFormation
+Frontend:        React + Vite + TypeScript
+Observabilidad:  CloudWatch Logs, CloudFormation Outputs
+```
+
+---
+
+## ✅ Checklist: ¿Estoy listo para S7?
+
+- [x] S0 base funcionando (CRUD + DynamoDB)
+- [x] S1 Rekognition Labels activo
+- [x] S2 Moderación + alt-text (gating de imagen)
+- [x] S3 Análisis de sentimiento activo
+- [x] S4 Traducción ES↔EN
+- [x] S5 Síntesis de voz (Polly)
+- [x] S6 Generación de descripciones (Claude)
+- [ ] S7 RAG + búsqueda semántica ← **PRÓXIMO HITO**
+- [ ] S8 Chatbot multi-turno (S7 + session management)
+
+---
+
+## 📚 Documentación
+
+| Tema | Archivo | Cuándo leer |
+|------|---------|-----------|
+| **Arquitectura completa** | [FLUJO-IMAGEN-AUTOMATIZADO.md](FLUJO-IMAGEN-AUTOMATIZADO.md) | Entender todo en profundidad |
+| **Guías paso a paso** | `sessions/S0{0..6}/GUIA.md` | Reproducir sesiones |
+| **Cliente vs Admin** | [GUIA-CLIENTE-ADMIN.md](GUIA-CLIENTE-ADMIN.md) | Usar el frontend |
+| **Estado y checklist** | [CAPSTONE-STATUS.md](CAPSTONE-STATUS.md) | Referencia rápida |
+| **Índice de docs** | [INDICE-DOCUMENTACION.md](INDICE-DOCUMENTACION.md) | Encontrar qué buscas |
+
+---
+
+## 🚀 Comandos Rápidos
 
 ```bash
-# 1. Clonar el repo dentro del VS Code IDE del sandbox
-git clone <este-repo> techmoda-ai-capstone && cd techmoda-ai-capstone
+# Estado del stack
+bash scripts/status.sh
 
-# 2. Configurar SAM para us-east-1
-cp samconfig.us-east-1.example samconfig.toml
+# Ver outputs (URLs)
+aws cloudformation describe-stacks \
+  --stack-name edson-martin-ontiveros-lima --region us-east-1 \
+  --query "Stacks[0].Outputs[*].[OutputKey,OutputValue]" --output table
 
-# 3. Construir y desplegar (atajo: bash scripts/deploy.sh)
-sam build
-sam deploy --stack-name techmoda-ai --region us-east-1 \
-  --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
-  --resolve-s3 --no-confirm-changeset
+# Ver productos en BD
+aws dynamodb scan --table-name edson-martin-ontiveros-lima-Products \
+  --region us-east-1 --output table
 
-# 4. (opcional) cargar productos de ejemplo CON imágenes para las sesiones de IA
-bash ai/seed/seed-products.sh
+# Logs en tiempo real
+aws logs tail /aws/lambda/edson-martin-ontiveros-lima-Router --follow
 
-# 5. Construir y publicar el frontend
-bash scripts/deploy-frontend.sh
+# Deploy (backend + frontend)
+bash scripts/deploy-all.sh
+
+# Bootstrap completo
+bash scripts/bootstrap.sh
 ```
-
-La salida del stack te da `ApiUrl` (la **Lambda Function URL** del router, formato
-`https://<id>.lambda-url.us-east-1.on.aws/`) y `FrontendUrl`. Ábrelos y verás el catálogo de TechModa.
-Detalle completo y validación en **[sessions/S00-base/GUIA.md](sessions/S00-base/GUIA.md)**.
-
-> 🧩 **Dos formas de llegar al mismo resultado:**
-> - **Progresiva (recomendada, pedagógica):** desplegás `template.yaml` (solo S0) y vas pegando el
->   `template-snippet.yaml` de cada sesión, una por hora. Así "ves crecer" la arquitectura.
-> - **Todo junto:** `sam build -t template.full.yaml && sam deploy -t template.full.yaml --stack-name techmoda-ai
->   --region us-east-1 --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND --resolve-s3 --no-confirm-changeset`
->   despliega la base + las 8 features de IA (S1–S8) + gobernanza (S10) ya cableadas, cada una con su
->   Function URL. Útil para una demo rápida o para revisar el resultado final.
->   Este archivo está **validado con `sam validate --lint`**.
->
-> ℹ️ Las Lambdas CRUD base usan **`nodejs22.x`** (la `nodejs18.x` del starter original quedó deprecada y su
-> creación está deshabilitada en AWS desde 2026-02). Las Lambdas de IA usan **`python3.12`**.
 
 ---
 
-## 💸 Nota de costos + cleanup (LEER SIEMPRE)
+## 💡 Conceptos Clave (AIF-C01)
 
-> 🔴 **Regla FinOps del capstone:** ningún recurso de IA se queda "encendido" entre sesiones más de lo necesario.
-> Bedrock, Rekognition, Comprehend, Polly, Translate **cobran por uso** (por imagen / por carácter / por token).
-> En volúmenes de práctica (decenas de llamadas) el costo es de **centavos**, pero **nunca lo dejes corriendo en bucle**.
-
-**Cada `GUIA.md` termina con:**
-1. Una **estimación de costo** de la sesión (marcada *"verificar contra la calculadora/precios oficiales de AWS"* — no inventamos cifras).
-2. El bloque de **cleanup** específico (qué borrar y cómo).
-
-Cleanup total del proyecto al terminar:
-
-```bash
-bash scripts/delete-all.sh   # vacía buckets S3 y borra el stack completo
-```
-
-Detalles: **[docs/COST_AND_CLEANUP.md](docs/COST_AND_CLEANUP.md)** y **[sessions/S11-integracion-demo-cleanup/GUIA.md](sessions/S11-integracion-demo-cleanup/GUIA.md)**.
-
----
-
-## 🧭 Cómo navegar este repo
-
-```
-techmoda-ai-capstone/
-├── README.md                  # este archivo
-├── README-BASE-SERVERLESS.md  # docs del capstone serverless base (sin IA)
-├── template.yaml              # SAM base (S0). Cada sesión agrega su snippet aquí.
-├── samconfig.us-east-1.example
-├── functions/                 # 5 Lambdas CRUD Node.js + router/ (1 Function URL, base S0)
-├── frontend/                  # React + Vite (base S0)
-├── scripts/                   # deploy / delete / logs / status
-├── ai/
-│   └── seed/                  # productos de ejemplo con imágenes para las sesiones IA
-└── sessions/
-    ├── S00-base/GUIA.md
-    ├── S01-rekognition-labels/
-    │   ├── GUIA.md
-    │   ├── functions/enrich-labels/        # Lambda Python + boto3
-    │   └── template-snippet.yaml           # recurso + Function URL + Policies: acotadas
-    ├── S02-... S08-...                      # mismo patrón
-    └── S09 / S10 / S11                       # guía + scaffold/scripts
-```
-
-**Flujo recomendado:** seguí las sesiones **en orden** (cada una asume la anterior). Para cada sesión:
-1. Leé `GUIA.md` completa (objetivo + concepto de IA + "qué entra en el examen").
-2. Pegá el `template-snippet.yaml` en `template.yaml`.
-3. `sam build && sam deploy`.
-4. Ejecutá el comando de prueba de la guía y observá el resultado.
-5. Corré el **checklist de validación** y el **cleanup**.
+| Concepto | Sesión | Aplicación |
+|----------|--------|-----------|
+| **Serverless** | S0 | Escalabilidad sin servidores |
+| **Computer Vision** | S1–S2 | Etiquetado + moderación |
+| **NLP** | S3 | Análisis de texto / sentimiento |
+| **Responsible AI** | S2 | Moderación + accesibilidad (WCAG) |
+| **IAM least privilege** | S0–S6 | Seguridad: cada función solo accede lo necesario |
+| **Traducción automática** | S4 | Multiidioma sin traductores |
+| **Síntesis de voz** | S5 | Accesibilidad |
+| **Foundation Models** | S6 | Generación de texto con Claude |
+| **Generative AI** | S6 | Prompting, tokens, temperatura, alucinaciones |
+| **Embeddings / Vector Search** | S7 | Búsqueda semántica (no solo keywords) |
+| **RAG** | S7 | Generación aumentada con retrieval |
+| **Multi-turn dialogue** | S8 | Chatbot con contexto |
 
 ---
 
-## ⚖️ Marca y alcance
+## 📞 ¿Cómo Usar Este README?
 
-Material educativo de **Bootcamp Institute** para el programa **AWS re/Start**, pista *AI Practitioner (AIF-C01)*.
-Caso práctico ficticio: la tienda **TechModa**. Los precios/cuotas de servicios que se citen están marcados
-para **verificar contra la documentación oficial de AWS** — no son cifras inventadas ni garantizadas.
+1. **Primera vez:** Lee "Lo que se ha implementado" + "Flujo Actual"
+2. **Entender S7:** Lee "Ruta a S7" + "Checklist"
+3. **Usar el app:** Ve a [GUIA-CLIENTE-ADMIN.md](GUIA-CLIENTE-ADMIN.md)
+4. **Referencia técnica:** Usa "Comandos Rápidos" y "Stack Actual"
+5. **Profundizar:** Ve a sesiones específicas en `sessions/`
 
-Proyecto **standalone** (no forma parte de ningún monorepo). Listo para revisión local. **No** se despliega
-automáticamente ni se publica.
+---
+
+## 🔗 URLs en Vivo (Después del Deploy)
+
+- **Frontend Cliente:** https://d33x5tfyjkvcnh.cloudfront.net
+- **API Router:** https://3v374r65fprni2nt74tue4bjp40wdmbp.lambda-url.us-east-1.on.aws/
+- **Imágenes CDN:** https://d2jgv7mcaqixc1.cloudfront.net/products/
+
+---
+
+**Última actualización:** 2026-09-23  
+**Sesiones completadas:** 6/12 (S0, S1, S2, S3, S4, S5, S6)  
+**Próximo hito:** S7 RAG + Búsqueda Semántica  
+**Objetivo final:** S8 Chatbot multi-turno
+
